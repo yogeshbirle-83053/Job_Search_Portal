@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Jobs | Job Search Portal{% endblock %}
+
+{% block content %}
+<!-- Search Header Banner -->
+<section class="bg-primary text-white py-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h2 class="fw-bold mb-1">Browse Job Openings</h2>
+        <p class="text-white-50 mb-0">Discover verified positions from top companies across India and worldwide</p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        {% if user.is_authenticated and user.is_employer %}
+          <a href="{% url 'jobs:create_job' %}" class="btn btn-light text-primary fw-semibold shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Post a Job
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Job Listings Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      
+      <!-- Filters Sidebar -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4 sticky-top" style="top: 80px; z-index: 10;">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-funnel me-2 text-primary"></i>Filter Jobs</h5>
+            {% if query or location_filter or category_filter or job_type_filter or exp_filter or min_salary %}
+              <a href="{% url 'jobs:job_list' %}" class="btn btn-sm btn-outline-danger">
+                Reset
+              </a>
+            {% endif %}
+          </div>
+
+          <form method="get" action="{% url 'jobs:job_list' %}">
+            <!-- Keyword Search -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Keywords</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Title, skills, company...">
+              </div>
+            </div>
+
+            <!-- Location Filter -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Location</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" name="location" value="{{ location_filter }}" class="form-control" placeholder="e.g. Bengaluru, Remote">
+              </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Category</label>
+              <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for code, label in categories %}
+                  <option value="{{ code }}" {% if category_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Job Type -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Job Type</label>
+              <select name="job_type" class="form-select">
+                <option value="">All Job Types</option>
+                {% for code, label in job_types %}
+                  <option value="{{ code }}" {% if job_type_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Experience Level -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Experience Level</label>
+              <select name="experience_level" class="form-select">
+                <option value="">All Experience Levels</option>
+                {% for code, label in experience_levels %}
+                  <option value="{{ code }}" {% if exp_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Minimum Salary -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold small text-muted text-uppercase">Min Salary (Annual ₹)</label>
+              <select name="min_salary" class="form-select">
+                <option value="">Any Salary</option>
+                <option value="300000" {% if min_salary == '300000' %}selected{% endif %}>₹3,00,000+</option>
+                <option value="600000" {% if min_salary == '600000' %}selected{% endif %}>₹6,00,000+</option>
+                <option value="1000000" {% if min_salary == '1000000' %}selected{% endif %}>₹10,00,000+</option>
+                <option value="1500000" {% if min_salary == '1500000' %}selected{% endif %}>₹15,00,000+</option>
+              </select>
+            </div>
+
+            <!-- Sort By Hidden or Exposed -->
+            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary fw-semibold">
+                <i class="bi bi-funnel-fill me-1"></i> Apply Filters
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Job Cards Column -->
+      <div class="col-lg-8">
+        
+        <!-- Results Bar -->
+        <div class="card border-0 shadow-sm p-3 mb-4">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+            <div>
+              <span class="text-muted small">Showing results for:</span>
+              <h6 class="fw-bold mb-0">
+                Found <span class="text-primary">{{ page_obj.paginator.count }}</span> Active Jobs
+              </h6>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <label class="small text-muted text-nowrap mb-0">Sort By:</label>
+              <form method="get" class="d-inline">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                {% if location_filter %}<input type="hidden" name="location" value="{{ location_filter }}">{% endif %}
+                {% if category_filter %}<input type="hidden" name="category" value="{{ category_filter }}">{% endif %}
+                {% if job_type_filter %}<input type="hidden" name="job_type" value="{{ job_type_filter }}">{% endif %}
+                {% if exp_filter %}<input type="hidden" name="experience_level" value="{{ exp_filter }}">{% endif %}
+                {% if min_salary %}<input type="hidden" name="min_salary" value="{{ min_salary }}">{% endif %}
+                
+                <select name="sort_by" class="form-select form-select-sm" onchange="this.form.submit()">
+                  <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                  <option value="salary_high" {% if sort_by == 'salary_high' %}selected{% endif %}>Highest Salary</option>
+                  <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Viewed</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Cards List -->
+        {% if page_obj %}
+          <div class="d-flex flex-column gap-3">
+            {% for job in page_obj %}
+              <div class="card border-0 shadow-sm card-hover p-4">
+                <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
+                  
+                  <!-- Company Logo -->
+                  <div class="flex-shrink-0">
+                    {% if job.company.has_logo %}
+                      <img src="{{ job.company.logo.url }}" alt="{{ job.company.company_name }}" class="rounded shadow-sm p-1 border bg-white" style="width: 64px; height: 64px; object-fit: contain;">
+                    {% else %}
+                      <div class="rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                        {{ job.company.company_name|first|upper }}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Job Details -->
+                  <div class="flex-grow-1">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-1">
+                      <div>
+                        <h5 class="fw-bold text-dark mb-1">
+                          <a href="{% url 'jobs:job_detail' job.pk %}" class="text-dark text-decoration-none">
+                            {{ job.title }}
+                          </a>
+                        </h5>
+                        <a href="{% url 'companies:company_detail' job.company.pk %}" class="text-muted small text-decoration-none fw-semibold">
+                          <i class="bi bi-building me-1"></i>{{ job.company.company_name }}
+                        </a>
+                      </div>
+                      <span class="text-primary fw-bold text-nowrap">
+                        {{ job.formatted_salary }}
+                      </span>
+                    </div>
+
+                    <!-- Badges -->
+                    <div class="d-flex flex-wrap gap-2 my-2">
+                      <span class="badge bg-light text-dark border">
+                        <i class="bi bi-geo-alt me-1 text-danger"></i>{{ job.location }}
+                      </span>
+                      <span class="badge bg-info-subtle text-info-emphasis border">
+                        <i class="bi bi-clock me-1"></i>{{ job.get_job_type_display }}
+                      </span>
+                      <span class="badge bg-light text-secondary border">
+                        <i class="bi bi-person-workspace me-1"></i>{{ job.get_experience_level_display }}
+                      </span>
+                    </div>
+
+                    <!-- Description Preview -->
+                    <p class="text-muted small mb-3 text-truncate" style="max-width: 650px;">
+                      {{ job.description }}
+                    </p>
+
+                    <!-- Required Skills Badges -->
+                    {% if job.get_skills_list %}
+                      <div class="d-flex flex-wrap gap-1 mb-3">
+                        {% for skill in job.get_skills_list|slice:":5" %}
+                          <span class="badge bg-light text-muted border small">{{ skill }}</span>
+                        {% endfor %}
+                        {% if job.get_skills_list|length > 5 %}
+                          <span class="badge bg-light text-muted border small">+{{ job.get_skills_list|length|add:"-5" }} more</span>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+
+                    <!-- Footer Action Bar -->
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                      <small class="text-muted">
+                        <i class="bi bi-calendar3 me-1"></i>Posted {{ job.created_at|timesince }} ago
+                      </small>
+                      <a href="{% url 'jobs:job_detail' job.pk %}" class="btn btn-outline-primary btn-sm fw-semibold">
+                        View Details <i class="bi bi-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Reusable Bootstrap Pagination -->
+          {% include 'includes/_pagination.html' %}
+
+        {% else %}
+          <!-- Empty State -->
+          <div class="card p-5 text-center border-0 shadow-sm">
+            <div class="rounded-circle bg-light text-muted mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+              <i class="bi bi-briefcase-slash fs-1"></i>
+            </div>
+            <h4 class="fw-bold">No Matching Jobs Found</h4>
+            <p class="text-muted mb-4">
+              We couldn't find any active jobs matching your search and filter criteria. Try broadening your keywords, resetting filters, or check back later!
+            </p>
+            <div>
+              <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm px-4">
+                Clear All Filters
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

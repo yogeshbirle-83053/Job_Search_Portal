@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Create an Account | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div class="card auth-card shadow-lg border-0">
+        <div class="auth-header">
+          <h3 class="fw-bold mb-1">Join JobPortal</h3>
+          <p class="mb-0 text-white-50">Create your account to start applying or hiring</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger" role="alert">
+                {% for error in form.non_field_errors %}
+                  <div><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- Role Selection -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">I want to:</label>
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="role-radio-card role-card-option {% if form.role.value == 'job_seeker' or not form.role.value %}border-primary bg-light{% endif %}" data-role="job_seeker">
+                    <i class="bi bi-person-workspace text-primary fs-2 mb-2 d-block"></i>
+                    <div class="fw-bold text-dark">Find a Job</div>
+                    <small class="text-muted d-block">Job Seeker</small>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="role-radio-card role-card-option {% if form.role.value == 'employer' %}border-primary bg-light{% endif %}" data-role="employer">
+                    <i class="bi bi-building-fill text-success fs-2 mb-2 d-block"></i>
+                    <div class="fw-bold text-dark">Hire Talent</div>
+                    <small class="text-muted d-block">Employer</small>
+                  </div>
+                </div>
+              </div>
+              <!-- Hidden or styled standard select for form submission -->
+              <div class="mt-2 d-none">
+                {{ form.role }}
+              </div>
+              {% if form.role.errors %}
+                <div class="text-danger small mt-1">{{ form.role.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Username -->
+            <div class="mb-3">
+              <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">
+                Username <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                {{ form.username }}
+              </div>
+              {% if form.username.errors %}
+                <div class="text-danger small mt-1">{{ form.username.errors|striptags }}</div>
+              {% else %}
+                <small class="text-muted">Letters, digits and @/./+/-/_ only.</small>
+              {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+                Email Address <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                {{ form.email }}
+              </div>
+              {% if form.email.errors %}
+                <div class="text-danger small mt-1">{{ form.email.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">
+                Password <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                {{ form.password }}
+              </div>
+              {% if form.password.errors %}
+                <div class="text-danger small mt-1">{{ form.password.errors|striptags }}</div>
+              {% else %}
+                <small class="text-muted">{{ form.password.help_text }}</small>
+              {% endif %}
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4">
+              <label for="{{ form.confirm_password.id_for_label }}" class="form-label fw-semibold">
+                Confirm Password <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-shield-check"></i></span>
+                {{ form.confirm_password }}
+              </div>
+              {% if form.confirm_password.errors %}
+                <div class="text-danger small mt-1">{{ form.confirm_password.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid mb-3">
+              <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                <i class="bi bi-person-plus me-1"></i> Create My Account
+              </button>
+            </div>
+
+            <p class="text-center text-muted small mb-0">
+              Already have an account? 
+              <a href="{% url 'accounts:login' %}" class="fw-semibold text-primary text-decoration-none">Sign in here</a>
+            </p>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

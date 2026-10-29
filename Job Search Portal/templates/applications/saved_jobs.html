@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Saved Jobs Wishlist | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold mb-1"><i class="bi bi-bookmark-heart text-danger me-2"></i>Saved Jobs Wishlist</h3>
+      <p class="text-muted small mb-0">Review bookmarked positions and apply when you are ready</p>
+    </div>
+    <span class="badge bg-primary fs-7 rounded-pill px-3 py-2">
+      {{ total_saved }} Saved Position{{ total_saved|pluralize }}
+    </span>
+  </div>
+
+  {% if page_obj %}
+    <div class="row g-4">
+      {% for item in page_obj %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm card-hover p-4 d-flex flex-column">
+            
+            <div class="d-flex align-items-start gap-3 mb-3">
+              {% if item.job.company.has_logo %}
+                <img src="{{ item.job.company.logo.url }}" alt="{{ item.job.company.company_name }}" class="rounded shadow-sm p-1 border bg-white" style="width: 52px; height: 52px; object-fit: contain;">
+              {% else %}
+                <div class="rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 52px; height: 52px; font-size: 1.3rem;">
+                  {{ item.job.company.company_name|first|upper }}
+                </div>
+              {% endif %}
+              
+              <div class="overflow-hidden flex-grow-1">
+                <h6 class="fw-bold text-dark mb-0 text-truncate">
+                  <a href="{% url 'jobs:job_detail' item.job.pk %}" class="text-dark text-decoration-none">
+                    {{ item.job.title }}
+                  </a>
+                </h6>
+                <small class="text-muted text-truncate d-block">{{ item.job.company.company_name }}</small>
+              </div>
+
+              <a href="{% url 'applications:toggle_save_job' item.job.pk %}" class="btn btn-sm btn-light text-danger" title="Remove from wishlist">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <span class="badge bg-light text-dark border small"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ item.job.location }}</span>
+              <span class="badge bg-info-subtle text-info-emphasis border small">{{ item.job.get_job_type_display }}</span>
+              {% if item.job.is_open %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle small">Active</span>
+              {% else %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">Closed</span>
+              {% endif %}
+            </div>
+
+            <p class="text-muted small text-truncate-2 mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">
+              {{ item.job.description }}
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+              <span class="text-primary fw-bold small">{{ item.job.formatted_salary }}</span>
+              {% if item.job.is_open %}
+                <a href="{% url 'applications:apply_job' item.job.pk %}" class="btn btn-primary btn-sm fw-semibold">
+                  Apply Now
+                </a>
+              {% else %}
+                <button class="btn btn-secondary btn-sm" disabled>Closed</button>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Reusable Bootstrap Pagination -->
+    {% include 'includes/_pagination.html' %}
+
+  {% else %}
+    <div class="card p-5 text-center border-0 shadow-sm">
+      <div class="rounded-circle bg-light text-muted mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+        <i class="bi bi-bookmark-x fs-1"></i>
+      </div>
+      <h4 class="fw-bold">No Saved Jobs</h4>
+      <p class="text-muted mb-4">
+        You haven't bookmarked any jobs to your wishlist yet. Click the "Save Job to Wishlist" button while browsing jobs to store them here.
+      </p>
+      <div>
+        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm px-4">
+          <i class="bi bi-search me-1"></i> Browse Jobs Now
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

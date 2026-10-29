@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Applicant: {{ profile.full_name|default:application.applicant.username }} | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Breadcrumb & Back -->
+  <div class="mb-4">
+    <a href="{% url 'applications:job_applicants' application.job.pk %}" class="text-decoration-none text-muted">
+      <i class="bi bi-arrow-left me-1"></i> Back to Applicants for {{ application.job.title }}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- Left Column: Applicant Profile Details -->
+    <div class="col-lg-8">
+      
+      <!-- Candidate Profile Header Card -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
+          <div class="flex-shrink-0">
+            {% if profile.profile_picture %}
+              <img src="{{ profile.profile_picture.url }}" alt="{{ profile.full_name }}" class="rounded-circle shadow-sm" style="width: 96px; height: 96px; object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 96px; height: 96px; font-size: 2.2rem;">
+                {{ application.applicant.username|first|upper }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="flex-grow-1 text-center text-sm-start">
+            <h3 class="fw-bold text-dark mb-1">{{ profile.full_name|default:application.applicant.username }}</h3>
+            <p class="text-muted small mb-2"><i class="bi bi-person-circle me-1"></i>@{{ application.applicant.username }}</p>
+
+            <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-3 text-muted small">
+              <span><i class="bi bi-envelope text-primary me-1"></i>{{ application.applicant.email }}</span>
+              {% if profile.phone %}
+                <span><i class="bi bi-telephone text-success me-1"></i>{{ profile.phone }}</span>
+              {% endif %}
+              {% if profile.location %}
+                <span><i class="bi bi-geo-alt text-danger me-1"></i>{{ profile.location }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cover Letter (if provided) -->
+      {% if application.cover_letter %}
+        <div class="card border-0 shadow-sm p-4 mb-4">
+          <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+            <i class="bi bi-chat-left-quote text-primary me-2"></i> Candidate Cover Letter
+          </h5>
+          <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.8;">
+            {{ application.cover_letter }}
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- Professional Summary -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-card-text text-primary me-2"></i> Professional Summary
+        </h5>
+        {% if profile.professional_summary %}
+          <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.8;">
+            {{ profile.professional_summary }}
+          </p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No summary provided.</p>
+        {% endif %}
+      </div>
+
+      <!-- Skills -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-tools text-primary me-2"></i> Skills & Competencies
+        </h5>
+        {% if skills_list %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for skill in skills_list %}
+              <span class="badge bg-light text-dark border px-3 py-2 fs-7 fw-normal">
+                <i class="bi bi-check2 text-primary me-1"></i>{{ skill }}
+              </span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No skills listed.</p>
+        {% endif %}
+      </div>
+
+      <!-- Work Experience & Projects -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-briefcase text-primary me-2"></i> Work Experience & Projects
+        </h5>
+        {% if profile.experience %}
+          <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.8;">
+            {{ profile.experience }}
+          </p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No work experience listed.</p>
+        {% endif %}
+      </div>
+
+      <!-- Education -->
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-mortarboard text-primary me-2"></i> Education
+        </h5>
+        {% if profile.education %}
+          <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.8;">
+            {{ profile.education }}
+          </p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No education details recorded.</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Right Column: Status Transition & Resume Snapshot -->
+    <div class="col-lg-4">
+      
+      <!-- Recruitment Status Card -->
+      <div class="card border-0 shadow-sm p-4 mb-4 sticky-top" style="top: 80px; z-index: 10;">
+        <h5 class="fw-bold text-dark mb-3">Application Status</h5>
+        
+        <div class="d-flex align-items-center justify-content-between p-3 rounded bg-light mb-3">
+          <span class="small text-muted fw-semibold">Current Status:</span>
+          <span class="badge bg-{{ application.status_badge_class }} border px-3 py-2 fs-7">
+            {{ application.get_status_display }}
+          </span>
+        </div>
+
+        <form method="post" class="mb-3">
+          {% csrf_token %}
+          <label class="form-label fw-semibold small text-muted text-uppercase">Update Recruitment Status</label>
+          <div class="mb-3">
+            {{ status_form.status }}
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary fw-semibold">
+              <i class="bi bi-arrow-repeat me-1"></i> Update Status
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-3">
+
+        <!-- Submitted Resume Download Card -->
+        <h6 class="fw-bold text-dark mb-2">Submitted Resume Snapshot</h6>
+        {% if application.resume %}
+          <div class="p-3 border rounded bg-light mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
+              <div class="overflow-hidden">
+                <span class="fw-bold small text-dark d-block text-truncate">{{ application.resume_filename }}</span>
+                <small class="text-muted">Verified PDF format</small>
+              </div>
+            </div>
+            <a href="{% url 'applications:download_resume' application.pk %}" target="_blank" class="btn btn-outline-danger btn-sm w-100 fw-semibold">
+              <i class="bi bi-download me-1"></i> Download / Preview Resume
+            </a>
+          </div>
+        {% else %}
+          <div class="alert alert-warning small mb-0">No resume attached to this application.</div>
+        {% endif %}
+
+        <div class="small text-muted mt-3">
+          <i class="bi bi-clock-history me-1"></i> Applied on {{ application.applied_at|date:"F d, Y - h:i A" }}<br>
+          <i class="bi bi-arrow-clockwise me-1"></i> Last updated {{ application.updated_at|timesince }} ago
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

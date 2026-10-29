@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}My Company | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  {% if company %}
+    <!-- Company Exists -->
+    <div class="card border-0 shadow-sm p-4 p-md-5">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom pb-4 mb-4">
+        <div class="d-flex align-items-center gap-3">
+          {% if company.has_logo %}
+            <img src="{{ company.logo.url }}" alt="{{ company.company_name }}" class="rounded shadow-sm p-1 border bg-white" style="width: 80px; height: 80px; object-fit: contain;">
+          {% else %}
+            <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; font-size: 2rem; font-weight: 700;">
+              {{ company.company_name|first|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <h3 class="fw-bold text-dark mb-1">{{ company.company_name }}</h3>
+            <span class="badge bg-success-subtle text-success me-2">Verified Employer</span>
+            <span class="badge bg-light text-dark border">{{ company.get_industry_display }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <a href="{% url 'companies:edit_company' company.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Edit Company Profile
+          </a>
+          <a href="{% url 'companies:company_detail' company.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-eye me-1"></i> Public View
+          </a>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="p-3 bg-light rounded">
+            <small class="text-muted text-uppercase fw-semibold d-block">Location</small>
+            <span class="fw-bold text-dark"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ company.location }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-light rounded">
+            <small class="text-muted text-uppercase fw-semibold d-block">Company Size</small>
+            <span class="fw-bold text-dark"><i class="bi bi-people me-1 text-info"></i>{{ company.get_company_size_display }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-light rounded">
+            <small class="text-muted text-uppercase fw-semibold d-block">Website</small>
+            {% if company.website %}
+              <a href="{{ company.website }}" target="_blank" class="fw-bold text-primary text-decoration-none text-truncate d-block">
+                {{ company.website }} <i class="bi bi-box-arrow-up-right small"></i>
+              </a>
+            {% else %}
+              <span class="text-muted">Not specified</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-2">Company Overview & Culture</h5>
+      <p class="text-secondary mb-4" style="white-space: pre-line; line-height: 1.7;">
+        {{ company.description }}
+      </p>
+
+      <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+        <span class="text-muted small">Registered on {{ company.created_at|date:"F d, Y" }}</span>
+        <a href="{% url 'jobs:create_job' %}" class="btn btn-primary fw-semibold">
+          <i class="bi bi-plus-circle me-1"></i> Post a Job for {{ company.company_name }}
+        </a>
+      </div>
+    </div>
+
+  {% else %}
+    <!-- No Company Created Yet -->
+    <div class="card border-0 shadow-sm p-5 text-center">
+      <div class="rounded-circle bg-primary-subtle text-primary mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+        <i class="bi bi-building-add fs-1"></i>
+      </div>
+      <h3 class="fw-bold mb-2">Create Your Company Profile</h3>
+      <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
+        Before posting jobs, build your company profile so candidates can learn about your organization, brand, and culture.
+      </p>
+      <div>
+        <a href="{% url 'companies:create_company' %}" class="btn btn-primary btn-lg fw-semibold px-4">
+          <i class="bi bi-plus-lg me-1"></i> Add Company Profile
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

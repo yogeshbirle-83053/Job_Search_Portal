@@ -1,0 +1,60 @@
+<footer class="py-5 mt-auto">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <h5 class="text-white d-flex align-items-center mb-3">
+          <i class="bi bi-briefcase-fill text-primary me-2"></i>Job<span class="text-primary">Portal</span>
+        </h5>
+        <p class="small text-muted mb-3">
+          A modern, full-stack platform connecting forward-thinking companies with exceptional talent. Discover opportunities, streamline your hiring process, and accelerate your career.
+        </p>
+        <div class="d-flex gap-3">
+          <a href="#" class="text-muted fs-5"><i class="bi bi-github"></i></a>
+          <a href="#" class="text-muted fs-5"><i class="bi bi-linkedin"></i></a>
+          <a href="#" class="text-muted fs-5"><i class="bi bi-twitter-x"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h6 class="text-white text-uppercase fs-7 fw-bold mb-3">Job Seekers</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a href="{% url 'jobs:job_list' %}">Browse Jobs</a></li>
+          <li class="mb-2"><a href="{% url 'accounts:register' %}?role=job_seeker">Create Profile</a></li>
+          <li class="mb-2"><a href="{% url 'accounts:login' %}">Seeker Dashboard</a></li>
+          <li class="mb-2"><a href="{% url 'companies:company_list' %}">Explore Companies</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h6 class="text-white text-uppercase fs-7 fw-bold mb-3">Employers</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a href="{% url 'accounts:register' %}?role=employer">Post a Job</a></li>
+          <li class="mb-2"><a href="{% url 'accounts:login' %}">Employer Dashboard</a></li>
+          <li class="mb-2"><a href="{% url 'companies:company_list' %}">Company Directory</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <h6 class="text-white text-uppercase fs-7 fw-bold mb-3">About & Contact</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a href="{% url 'core:about' %}">About Our Portal</a></li>
+          <li class="mb-2"><a href="{% url 'core:contact' %}">Contact Us / Support</a></li>
+          <li class="text-muted mt-3">
+            <i class="bi bi-geo-alt-fill me-1 text-primary"></i> Bengaluru, Karnataka, India<br>
+            <i class="bi bi-envelope-fill me-1 text-primary"></i> support@jobportal.example.com
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="border-secondary my-4">
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted">
+      <p class="mb-0">&copy; {% now "Y" %} JobPortal Inc. All rights reserved. Built with Django & MySQL.</p>
+      <div class="mt-2 mt-sm-0">
+        <a href="#" class="text-muted me-3">Privacy Policy</a>
+        <a href="#" class="text-muted">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>

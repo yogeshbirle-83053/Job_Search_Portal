@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.company_name }} | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Company Banner / Overview -->
+  <div class="card border-0 shadow-sm p-4 p-md-5 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+      <div class="flex-shrink-0">
+        {% if company.has_logo %}
+          <img src="{{ company.logo.url }}" alt="{{ company.company_name }}" class="rounded shadow-sm p-2 border bg-white" style="width: 120px; height: 120px; object-fit: contain;">
+        {% else %}
+          <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 120px; height: 120px; font-size: 3rem; font-weight: 700;">
+            {{ company.company_name|first|upper }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="flex-grow-1 text-center text-md-start">
+        <h2 class="fw-bold text-dark mb-1">{{ company.company_name }}</h2>
+        <span class="badge bg-primary-subtle text-primary fs-7 mb-3">{{ company.get_industry_display }}</span>
+
+        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 text-muted small mb-3">
+          <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ company.location }}</span>
+          <span><i class="bi bi-people-fill text-info me-1"></i>{{ company.get_company_size_display }}</span>
+          {% if company.website %}
+            <span>
+              <i class="bi bi-globe text-primary me-1"></i>
+              <a href="{{ company.website }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-primary fw-semibold">
+                {{ company.website }} <i class="bi bi-box-arrow-up-right small"></i>
+              </a>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if user.is_authenticated and user == company.employer %}
+        <div class="flex-shrink-0">
+          <a href="{% url 'companies:edit_company' company.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <hr class="my-4">
+
+    <!-- About Company -->
+    <h5 class="fw-bold mb-3">About {{ company.company_name }}</h5>
+    <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.7;">
+      {{ company.description }}
+    </p>
+  </div>
+
+  <!-- Open Positions at this Company -->
+  <div class="card border-0 shadow-sm p-4 p-md-5">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+      <div>
+        <h4 class="fw-bold mb-0">Open Positions at {{ company.company_name }}</h4>
+        <small class="text-muted">Explore current career opportunities posted by this employer</small>
+      </div>
+      {% if user.is_authenticated and user == company.employer %}
+        <a href="{% url 'jobs:create_job' %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-circle me-1"></i> Post New Job
+        </a>
+      {% endif %}
+    </div>
+
+    {% if open_jobs %}
+      <div class="row g-3">
+        {% for job in open_jobs %}
+          <div class="col-md-6">
+            <div class="card h-100 border p-3 card-hover">
+              <h5 class="fw-bold text-dark mb-1">{{ job.title }}</h5>
+              <div class="d-flex gap-2 mb-2">
+                <span class="badge bg-light text-dark border">{{ job.get_job_type_display }}</span>
+                <span class="badge bg-light text-secondary border">{{ job.location }}</span>
+              </div>
+              <p class="text-muted small text-truncate mb-3">{{ job.description }}</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="text-primary fw-semibold small">₹{{ job.salary_min|default:"Competitive" }}</span>
+                <a href="{% url 'jobs:job_detail' job.pk %}" class="btn btn-outline-primary btn-sm">
+                  View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="bi bi-briefcase fs-2 mb-2 d-block text-secondary"></i>
+        <p class="mb-0">There are currently no active openings posted by this company.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'companies:company_list' %}" class="text-decoration-none text-muted">
+      <i class="bi bi-arrow-left me-1"></i> Back to Company Directory
+    </a>
+  </div>
+</div>
+{% endblock %}

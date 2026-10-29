@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Applicants for {{ job.title }} | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold mb-1">
+        <i class="bi bi-people-fill text-primary me-2"></i>Applicants for: {{ job.title }}
+      </h3>
+      <p class="text-muted small mb-0">
+        {{ job.company.company_name }} • {{ job.location }} • Posted {{ job.created_at|date:"M d, Y" }}
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'jobs:job_detail' job.pk %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-eye me-1"></i> Public Job View
+      </a>
+      <a href="{% url 'jobs:manage_jobs' %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Manage Jobs
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Badges -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Total Applicants</span>
+        <h3 class="fw-bold text-dark mb-0">{{ total_applied }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Shortlisted</span>
+        <h3 class="fw-bold text-warning mb-0">{{ shortlisted }}</h3>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Hired</span>
+        <h3 class="fw-bold text-success mb-0">{{ hired }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+    <a href="?status=ALL" class="btn btn-sm {% if status_filter == 'ALL' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      All ({{ total_applied }})
+    </a>
+    {% for code, label in status_choices %}
+      <a href="?status={{ code }}" class="btn btn-sm {% if status_filter == code %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Applicants Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      {% if page_obj %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Candidate</th>
+                <th>Contact</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Resume</th>
+                <th class="text-end pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in page_obj %}
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex align-items-center gap-3">
+                      {% if app.applicant.seeker_profile.profile_picture %}
+                        <img src="{{ app.applicant.seeker_profile.profile_picture.url }}" alt="{{ app.applicant.username }}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; object-fit: cover;">
+                      {% else %}
+                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 44px; height: 44px;">
+                          {{ app.applicant.username|first|upper }}
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                          <a href="{% url 'applications:applicant_detail' app.pk %}" class="text-dark text-decoration-none">
+                            {{ app.applicant.seeker_profile.full_name|default:app.applicant.username }}
+                          </a>
+                        </h6>
+                        <small class="text-muted">@{{ app.applicant.username }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <small class="d-block text-dark"><i class="bi bi-envelope me-1"></i>{{ app.applicant.email }}</small>
+                    {% if app.applicant.seeker_profile.phone %}
+                      <small class="d-block text-muted"><i class="bi bi-telephone me-1"></i>{{ app.applicant.seeker_profile.phone }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-muted">{{ app.applied_at|date:"M d, Y" }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-{{ app.status_badge_class }} border px-2 py-1">
+                      {{ app.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if app.resume %}
+                      <a href="{% url 'applications:download_resume' app.pk %}" target="_blank" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Resume
+                      </a>
+                    {% else %}
+                      <span class="text-muted small">None</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="{% url 'applications:applicant_detail' app.pk %}" class="btn btn-primary btn-sm fw-semibold">
+                      Review <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reusable Bootstrap Pagination -->
+        {% include 'includes/_pagination.html' %}
+
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-people fs-1 text-muted d-block mb-3"></i>
+          <h5 class="fw-bold">No Applicants Yet</h5>
+          <p class="text-muted small mb-0">No candidates have applied for this job matching the selected filter.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

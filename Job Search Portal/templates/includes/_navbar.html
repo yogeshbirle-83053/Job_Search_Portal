@@ -1,0 +1,132 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm py-2">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center text-primary fs-4" href="{% url 'core:home' %}">
+      <i class="bi bi-briefcase-fill me-2 fs-3"></i>
+      <span>Job<span class="text-dark">Portal</span></span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'jobs:job_list' %}">Browse Jobs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'companies:company_list' %}">Companies</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:about' %}">About Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        {% if user.is_authenticated %}
+          <!-- Role Badges & Context Links -->
+          {% if user.is_job_seeker %}
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{% url 'applications:my_applications' %}">
+                <i class="bi bi-file-earmark-check me-1"></i>Applications
+              </a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{% url 'applications:saved_jobs' %}">
+                <i class="bi bi-bookmark-heart me-1"></i>Saved
+              </a>
+            </li>
+            <li class="nav-item me-3">
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'dashboard:seeker_dashboard' %}">
+                <i class="bi bi-speedometer2 me-1"></i>Seeker Dashboard
+              </a>
+            </li>
+          {% elif user.is_employer %}
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{% url 'jobs:manage_jobs' %}">
+                <i class="bi bi-list-task me-1"></i>Manage Jobs
+              </a>
+            </li>
+            <li class="nav-item me-3">
+              <a class="btn btn-primary btn-sm" href="{% url 'jobs:create_job' %}">
+                <i class="bi bi-plus-circle me-1"></i>Post a Job
+              </a>
+            </li>
+            <li class="nav-item me-3">
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'dashboard:employer_dashboard' %}">
+                <i class="bi bi-speedometer2 me-1"></i>Employer Dashboard
+              </a>
+            </li>
+          {% endif %}
+
+          {% if user.is_portal_admin %}
+            <li class="nav-item me-2">
+              <a class="btn btn-outline-dark btn-sm" href="/admin/" target="_blank">
+                <i class="bi bi-shield-lock me-1"></i>Admin Panel
+              </a>
+            </li>
+          {% endif %}
+
+          <!-- User Account Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: 600;">
+                {{ user.username|first|upper }}
+              </div>
+              <span class="me-1 fw-semibold">{{ user.username }}</span>
+              <span class="badge {% if user.is_employer %}bg-success{% else %}bg-info text-dark{% endif %} badge-role ms-1">
+                {{ user.get_role_display }}
+              </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="userDropdown">
+              <li>
+                <div class="dropdown-header">
+                  <strong>Signed in as</strong><br>
+                  <small class="text-muted">{{ user.email }}</small>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              {% if user.is_job_seeker %}
+                <li><a class="dropdown-item" href="{% url 'accounts:seeker_profile' %}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard:seeker_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+              {% elif user.is_employer %}
+                <li><a class="dropdown-item" href="{% url 'companies:my_company' %}"><i class="bi bi-building me-2"></i>Company Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard:employer_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+              {% endif %}
+              <li><a class="dropdown-item" href="{% url 'accounts:change_password' %}"><i class="bi bi-key me-2"></i>Change Password</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                  <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                </a>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <!-- Unauthenticated Guests -->
+          <li class="nav-item me-2">
+            <a class="nav-link" href="{% url 'accounts:login' %}">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+            </a>
+          </li>
+          <li class="nav-item me-2">
+            <a class="btn btn-outline-primary btn-sm px-3" href="{% url 'accounts:register' %}">
+              Register
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm px-3" href="{% url 'accounts:register' %}?role=employer">
+              <i class="bi bi-briefcase me-1"></i>Employers / Post Job
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

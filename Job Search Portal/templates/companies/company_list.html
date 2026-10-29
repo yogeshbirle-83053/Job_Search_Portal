@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Top Companies | Job Search Portal{% endblock %}
+
+{% block content %}
+<!-- Header / Search Banner -->
+<section class="bg-primary text-white py-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+  <div class="container py-3">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8">
+        <h1 class="fw-bold mb-2">Explore Top Hiring Companies</h1>
+        <p class="lead text-white-50 mb-4">Discover verified employers, explore company culture, and view open positions</p>
+
+        <!-- Search & Filter Bar -->
+        <form method="get" class="card p-2 p-md-3 shadow border-0 bg-white text-dark text-start">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="q" value="{{ query }}" class="form-control border-0" placeholder="Search by company name, location...">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <select name="industry" class="form-select border-0">
+                <option value="">All Industries</option>
+                {% for code, label in industries %}
+                  <option value="{{ code }}" {% if industry_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2 d-grid">
+              <button type="submit" class="btn btn-primary fw-semibold">
+                Filter
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Company Directory Grid -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold text-dark mb-0">
+        Companies Found <span class="badge bg-primary rounded-pill">{{ page_obj.paginator.count }}</span>
+      </h5>
+      {% if query or industry_filter %}
+        <a href="{% url 'companies:company_list' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x-circle me-1"></i> Clear Filters
+        </a>
+      {% endif %}
+    </div>
+
+    {% if page_obj %}
+      <div class="row g-4">
+        {% for company in page_obj %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm card-hover p-4 text-center">
+              <div class="mb-3">
+                {% if company.has_logo %}
+                  <img src="{{ company.logo.url }}" alt="{{ company.company_name }}" class="rounded shadow-sm p-1 border bg-white" style="width: 72px; height: 72px; object-fit: contain;">
+                {% else %}
+                  <div class="rounded bg-light text-primary mx-auto d-flex align-items-center justify-content-center shadow-sm" style="width: 72px; height: 72px; font-size: 1.8rem; font-weight: 700;">
+                    {{ company.company_name|first|upper }}
+                  </div>
+                {% endif %}
+              </div>
+
+              <h5 class="fw-bold text-dark mb-1">{{ company.company_name }}</h5>
+              <span class="badge bg-light text-secondary border mb-3">{{ company.get_industry_display }}</span>
+
+              <p class="text-muted small text-truncate-2 mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 40px;">
+                {{ company.description }}
+              </p>
+
+              <div class="d-flex justify-content-center gap-3 text-muted small mb-4">
+                <span><i class="bi bi-geo-alt me-1 text-danger"></i>{{ company.location }}</span>
+                <span><i class="bi bi-people me-1 text-info"></i>{{ company.get_company_size_display }}</span>
+              </div>
+
+              <div class="mt-auto">
+                <a href="{% url 'companies:company_detail' company.pk %}" class="btn btn-outline-primary w-100 btn-sm fw-semibold">
+                  View Profile & Jobs
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Reusable Bootstrap Pagination -->
+      {% include 'includes/_pagination.html' %}
+
+    {% else %}
+      <div class="card p-5 text-center border-0 shadow-sm">
+        <div class="rounded-circle bg-light text-muted mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+          <i class="bi bi-building-slash fs-1"></i>
+        </div>
+        <h4 class="fw-bold">No Companies Found</h4>
+        <p class="text-muted">No companies matched your search criteria. Try modifying your filters or search keywords.</p>
+        <div>
+          <a href="{% url 'companies:company_list' %}" class="btn btn-primary btn-sm">
+            Reset Filters
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Resume | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div class="card border-0 shadow-sm p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="rounded-circle bg-danger-subtle text-danger mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+            <i class="bi bi-file-earmark-pdf-fill fs-1"></i>
+          </div>
+          <h3 class="fw-bold mb-1">Upload Your Resume</h3>
+          <p class="text-muted small">Upload your updated CV in PDF format to apply for jobs with one click</p>
+        </div>
+
+        {% if profile.has_resume %}
+          <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            <div class="small">
+              You currently have a resume on file: <strong>{{ profile.resume_filename }}</strong>.<br>
+              Uploading a new file will replace your existing resume.
+            </div>
+          </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}
+                <div><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-4">
+            <label for="{{ form.resume.id_for_label }}" class="form-label fw-semibold">
+              Select PDF Document <span class="text-danger">*</span>
+            </label>
+            {{ form.resume }}
+            {% if form.resume.errors %}
+              <div class="text-danger small mt-2">{{ form.resume.errors|striptags }}</div>
+            {% endif %}
+            <small class="text-muted d-block mt-2">
+              <i class="bi bi-shield-check text-success me-1"></i>Only PDF format (.pdf) is allowed. Maximum size: 5MB.
+            </small>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+              <i class="bi bi-cloud-arrow-up me-1"></i> Upload & Save Resume
+            </button>
+            <a href="{% url 'accounts:seeker_profile' %}" class="btn btn-outline-secondary">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

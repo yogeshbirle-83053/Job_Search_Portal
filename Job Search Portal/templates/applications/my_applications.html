@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}My Applications | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold mb-1"><i class="bi bi-file-earmark-check me-2 text-primary"></i>My Applications</h3>
+      <p class="text-muted small mb-0">Track real-time progress and review stages for all your submitted applications</p>
+    </div>
+    <div>
+      <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm fw-semibold">
+        <i class="bi bi-search me-1"></i> Browse More Jobs
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Badges -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Total Applied</span>
+        <h3 class="fw-bold text-dark mb-0">{{ total_count }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Under Review</span>
+        <h3 class="fw-bold text-info mb-0">{{ under_review_count }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Shortlisted</span>
+        <h3 class="fw-bold text-warning mb-0">{{ shortlisted_count }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm p-3 bg-white">
+        <span class="text-muted small text-uppercase fw-semibold d-block">Offers / Hired</span>
+        <h3 class="fw-bold text-success mb-0">{{ hired_count }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filter Pills -->
+  <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+    <a href="?status=ALL" class="btn btn-sm {% if status_filter == 'ALL' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      All ({{ total_count }})
+    </a>
+    <a href="?status=APPLIED" class="btn btn-sm {% if status_filter == 'APPLIED' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      Applied
+    </a>
+    <a href="?status=UNDER_REVIEW" class="btn btn-sm {% if status_filter == 'UNDER_REVIEW' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      Under Review
+    </a>
+    <a href="?status=SHORTLISTED" class="btn btn-sm {% if status_filter == 'SHORTLISTED' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      Shortlisted
+    </a>
+    <a href="?status=HIRED" class="btn btn-sm {% if status_filter == 'HIRED' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      Hired
+    </a>
+    <a href="?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-3">
+      Rejected
+    </a>
+  </div>
+
+  <!-- Applications Table Card -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      {% if page_obj %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Job Title & Company</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Resume Submitted</th>
+                <th class="text-end pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in page_obj %}
+                <tr>
+                  <td class="ps-4">
+                    <h6 class="fw-bold text-dark mb-0">
+                      <a href="{% url 'jobs:job_detail' app.job.pk %}" class="text-dark text-decoration-none">
+                        {{ app.job.title }}
+                      </a>
+                    </h6>
+                    <small class="text-muted">
+                      <i class="bi bi-building me-1"></i>{{ app.job.company.company_name }} • {{ app.job.location }}
+                    </small>
+                  </td>
+                  <td>
+                    <span class="small text-muted">{{ app.applied_at|date:"M d, Y" }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-{{ app.status_badge_class }} border px-3 py-2">
+                      {{ app.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if app.resume %}
+                      <a href="{% url 'applications:download_resume' app.pk %}" target="_blank" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> View Resume
+                      </a>
+                    {% else %}
+                      <span class="text-muted small">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="d-flex justify-content-end gap-2">
+                      <a href="{% url 'jobs:job_detail' app.job.pk %}" class="btn btn-light btn-sm">
+                        <i class="bi bi-eye"></i> View Job
+                      </a>
+                      {% if app.is_withdrawable %}
+                        <a href="{% url 'applications:withdraw_application' app.pk %}" class="btn btn-outline-danger btn-sm" data-confirm="Are you sure you want to withdraw your application for '{{ app.job.title }}'?">
+                          <i class="bi bi-x-circle me-1"></i> Withdraw
+                        </a>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reusable Bootstrap Pagination -->
+        {% include 'includes/_pagination.html' %}
+
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+          <h5 class="fw-bold">No Applications in this Category</h5>
+          <p class="text-muted small mb-3">You haven't submitted any applications matching this filter.</p>
+          <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-search me-1"></i> Search Available Jobs
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

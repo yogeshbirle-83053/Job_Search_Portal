@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | Job Search Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    
+    <!-- Profile Sidebar Card -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm text-center p-4">
+        <div class="mb-3">
+          {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" alt="{{ profile.full_name }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 140px; height: 140px; object-fit: cover;">
+          {% else %}
+            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 140px; height: 140px; font-size: 3rem; font-weight: 700;">
+              {{ user.username|first|upper }}
+            </div>
+          {% endif %}
+        </div>
+
+        <h4 class="fw-bold mb-1">{{ profile.full_name|default:user.username }}</h4>
+        <p class="text-muted small mb-2"><i class="bi bi-person-circle me-1"></i>@{{ user.username }}</p>
+        <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2">Job Seeker</span>
+
+        {% if profile.location %}
+          <p class="text-muted small mb-2">
+            <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ profile.location }}
+          </p>
+        {% endif %}
+
+        {% if profile.phone %}
+          <p class="text-muted small mb-2">
+            <i class="bi bi-telephone-fill text-success me-1"></i>{{ profile.phone }}
+          </p>
+        {% endif %}
+
+        <p class="text-muted small mb-4">
+          <i class="bi bi-envelope-fill text-primary me-1"></i>{{ user.email }}
+        </p>
+
+        <div class="d-grid gap-2">
+          <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+          </a>
+          <a href="{% url 'accounts:upload_resume' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Update Resume
+          </a>
+        </div>
+      </div>
+
+      <!-- Resume Status Card -->
+      <div class="card border-0 shadow-sm mt-4 p-4">
+        <h5 class="fw-bold mb-3 d-flex align-items-center">
+          <i class="bi bi-file-earmark-pdf text-danger me-2 fs-4"></i> Resume / CV
+        </h5>
+        {% if profile.has_resume %}
+          <div class="alert alert-success d-flex align-items-center mb-3 p-2">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div class="small">
+              <strong>Uploaded:</strong> {{ profile.resume_filename }}
+            </div>
+          </div>
+          <div class="d-grid">
+            <a href="{{ profile.resume.url }}" target="_blank" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-download me-1"></i> Download / View Resume (PDF)
+            </a>
+          </div>
+        {% else %}
+          <div class="alert alert-warning small mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> No resume uploaded yet. Having a PDF resume increases your chances of being hired.
+          </div>
+          <div class="d-grid">
+            <a href="{% url 'accounts:upload_resume' %}" class="btn btn-warning btn-sm fw-semibold">
+              <i class="bi bi-upload me-1"></i> Upload PDF Resume
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Main Profile Content -->
+    <div class="col-lg-8">
+      
+      <!-- Professional Summary -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-card-text text-primary me-2"></i> Professional Summary
+        </h5>
+        {% if profile.professional_summary %}
+          <p class="text-secondary mb-0" style="white-space: pre-line;">{{ profile.professional_summary }}</p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No summary added yet. Click "Edit Profile" to tell employers about your career objective and strengths.</p>
+        {% endif %}
+      </div>
+
+      <!-- Skills -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-tools text-primary me-2"></i> Core Skills & Expertise
+        </h5>
+        {% if skills_list %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for skill in skills_list %}
+              <span class="badge bg-light text-dark border px-3 py-2 fs-7 fw-normal">
+                <i class="bi bi-check2 text-primary me-1"></i>{{ skill }}
+              </span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No skills added yet. Add comma-separated skills in "Edit Profile" (e.g. Python, Django, MySQL).</p>
+        {% endif %}
+      </div>
+
+      <!-- Work Experience -->
+      <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-briefcase text-primary me-2"></i> Work Experience & Projects
+        </h5>
+        {% if profile.experience %}
+          <p class="text-secondary mb-0" style="white-space: pre-line;">{{ profile.experience }}</p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No work experience or project history recorded yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Education -->
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-mortarboard text-primary me-2"></i> Education & Qualifications
+        </h5>
+        {% if profile.education %}
+          <p class="text-secondary mb-0" style="white-space: pre-line;">{{ profile.education }}</p>
+        {% else %}
+          <p class="text-muted fst-italic mb-0">No education details recorded yet.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
